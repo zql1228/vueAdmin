@@ -4,17 +4,15 @@
       <SideMenu></SideMenu>
     </el-aside>
     <el-container>
-      <el-header style="height: 55px;">
-        <strong  >VueAdmin后台管理系统</strong>
+      <el-header style="height: 55px">
+        <strong>VueAdmin后台管理系统</strong>
         <div class="header-avatar block">
           <el-avatar class="el-avatar" size="medium" :src="userInfo.avatar"></el-avatar>
           <el-dropdown>
-                      <span class="el-dropdown-link">
-                        {{userInfo.username}}<i class="el-icon-arrow-down el-icon--right"></i>
-                      </span>
+            <span class="el-dropdown-link"> {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i> </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item :underline="false">
-                <router-link :to="{name: 'UserCenter'}">个人中心</router-link>
+                <router-link :to="{ path: '/userCenter' }">个人中心</router-link>
               </el-dropdown-item>
               <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
             </el-dropdown-menu>
@@ -24,45 +22,57 @@
         </div>
       </el-header>
       <el-main>
-
-        <div style="margin: 0 15px;">
-          <router-view></router-view>
-        </div>
+        <Tabs></Tabs>
       </el-main>
     </el-container>
   </el-container>
-
 </template>
 <script>
-import SideMenu from "@/views/inc/SideMenu";
+import SideMenu from '@/views/inc/SideMenu'
+import Tabs from '@/views/inc/Tabs'
 export default {
-name: "Home.vue",
-  components:{SideMenu},
-data() {
-  return {
-    userInfo: {
-    id: '-1',
-    username: 'admin',
-    avatar: 'https://image-1300566513.cos.ap-guangzhou.myqcloud.com/upload/images/5a9f48118166308daba8b6da7e466aab.jpg'
-  }
-}
-},
+  name: 'Home',
+  components: { SideMenu, Tabs },
+  data() {
+    return {
+      userInfo: {},
+    }
+  },
+  mounted() {
+    this.getUserInfo()
+  },
+  methods: {
+    getUserInfo() {
+      this.$axios.get('/sys/userInfo').then((res) => {
+        this.userInfo = res.data.data
+      })
+    },
+    logout() {
+      this.$axios.post('/logout').then((res) => {
+        localStorage.clear()
+        sessionStorage.clear()
+        this.$store.commit('resetState')
+        this.$router.push('/login')
+      })
+    },
+  },
 }
 </script>
 <style scoped>
-.el-container{
-  height:100%;
+.el-container {
+  height: 100%;
   padding: 0;
-  margin:0
+  margin: 0;
 }
-.header-avatar{
+.header-avatar {
   float: right;
   width: 210px;
   display: flex;
-  justify-content:space-around;
+  justify-content: space-around;
   align-items: center;
 }
-.el-header, .el-footer {
+.el-header,
+.el-footer {
   background-color: #17b3a3;
   color: #333;
   text-align: center;
@@ -70,16 +80,15 @@ data() {
 }
 
 .el-aside {
-  background-color: #D3DCE6;
+  background-color: #d3dce6;
   color: #333;
   line-height: 200px;
 }
 
 .el-main {
-  background-color: #E9EEF3;
+  background-color: #fff;
   color: #333;
-  text-align: center;
-  line-height: 160px;
+  padding: 0px;
 }
 
 body > .el-container {
@@ -97,7 +106,16 @@ body > .el-container {
 
 .el-dropdown-link {
   cursor: pointer;
-  color: #409EFF;
 }
-
+a,
+a:hover {
+  text-decoration: none;
+}
+.el-link.el-link--default:hover {
+  color: #606266;
+  text-decoration: none;
+}
+.el-link.is-underline:hover:after {
+  border-bottom: 0;
+}
 </style>
