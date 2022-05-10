@@ -42,6 +42,10 @@ Mock.mock('/sys/user/updataPass', 'post', (config) => {
   //修改个人信息
   return result
 })
+Mock.mock('/sys/menu/list', 'get', (config) => {
+  //修改个人信息
+  return result
+})
 Mock.mock('/sys/menu/nav', 'get', (config) => {
   //获取路由
   let nav = [

@@ -107,10 +107,6 @@ body > .el-container {
 .el-dropdown-link {
   cursor: pointer;
 }
-a,
-a:hover {
-  text-decoration: none;
-}
 .el-link.el-link--default:hover {
   color: #606266;
   text-decoration: none;
