@@ -1,3 +1,4 @@
+import { tableData } from './views/sys/common/columns'
 const Mock = require('mockjs')
 const Random = Mock.Random //用于生成各种随机数据
 let result = {
@@ -5,6 +6,58 @@ let result = {
   msg: '操作成功',
   data: null,
 }
+let nav = [
+  {
+    name: 'SysManga',
+    title: '系统管理',
+    icon: 'el-icon-s-operation',
+    path: '',
+    component: '',
+    children: [
+      {
+        name: 'SysUser',
+        title: '用户管理',
+        icon: 'el-icon-s-custom',
+        path: '/users',
+        component: 'sys/User',
+        children: [],
+      },
+      {
+        name: 'SysRole',
+        title: '角色管理',
+        icon: 'el-icon-rank',
+        path: '/roles',
+        component: 'sys/Role',
+        children: [],
+      },
+      {
+        name: 'SysMenu',
+        title: '菜单管理',
+        icon: 'el-icon-menu',
+        path: '/menus',
+        component: 'sys/Menu',
+        children: [],
+      },
+    ],
+  },
+  {
+    name: 'SysTools',
+    title: '系统工具',
+    icon: 'el-icon-s-tools',
+    path: '',
+    component: '',
+    children: [
+      {
+        name: 'SysDict',
+        title: '数字字典',
+        icon: 'el-icon-s-order',
+        path: '/sys/dicts',
+        component: '',
+        children: [],
+      },
+    ],
+  },
+]
 //Mock.mock()用于生成模拟数据
 Mock.mock('/captcha', 'post', () => {
   return {
@@ -42,68 +95,106 @@ Mock.mock('/sys/user/updataPass', 'post', (config) => {
   //修改个人信息
   return result
 })
-Mock.mock('/sys/menu/list', 'get', (config) => {
-  //修改个人信息
-  return result
-})
 Mock.mock('/sys/menu/nav', 'get', (config) => {
   //获取路由
-  let nav = [
-    {
-      name: 'SysManga',
-      title: '系统管理',
-      icon: 'el-icon-s-operation',
-      path: '',
-      component: '',
-      children: [
-        {
-          name: 'SysUser',
-          title: '用户管理',
-          icon: 'el-icon-s-custom',
-          path: '/users',
-          component: 'sys/User',
-          children: [],
-        },
-        {
-          name: 'SysRole',
-          title: '角色管理',
-          icon: 'el-icon-rank',
-          path: '/roles',
-          component: 'sys/Role',
-          children: [],
-        },
-        {
-          name: 'SysMenu',
-          title: '菜单管理',
-          icon: 'el-icon-menu',
-          path: '/menus',
-          component: 'sys/Menu',
-          children: [],
-        },
-      ],
-    },
-    {
-      name: 'SysTools',
-      title: '系统工具',
-      icon: 'el-icon-s-tools',
-      path: '',
-      component: '',
-      children: [
-        {
-          name: 'SysDict',
-          title: '数字字典',
-          icon: 'el-icon-s-order',
-          path: '/sys/dicts',
-          component: '',
-          children: [],
-        },
-      ],
-    },
-  ]
   let authoritys = []
   result.data = {
     nav,
     authoritys: authoritys,
   }
+  return result
+})
+////////////////////////////
+Mock.mock('/sys/menu/list', 'get', (res) => {
+  // console.log(res)
+  //获取列表数据
+  let menus = tableData
+  result.data = menus
+  return result
+})
+Mock.mock(RegExp('/sys/role/list*'), 'get', () => {
+  result.data = {
+    records: [
+      {
+        id: 3,
+        created: '2021-01-04T10:09:14',
+        updated: '2021-01-30T08:19:52',
+        statu: 1,
+        name: '普通用户',
+        code: 'normal',
+        remark: '只有基本查看功能',
+        menuIds: [],
+      },
+      {
+        id: 6,
+        created: '2021-01-16T13:29:03',
+        updated: '2021-01-17T15:50:45',
+        statu: 1,
+        name: '超级管理员',
+        code: 'admin',
+        remark: '系统默认最高权限，不可以编辑和任意修改',
+        menuIds: [],
+      },
+    ],
+    total: 2,
+    size: 10,
+    current: 1,
+    orders: [],
+    optimizeCountSql: true,
+    hitCount: false,
+    countId: null,
+    maxLimit: null,
+    searchCount: true,
+    pages: 1,
+  }
+
+  return result
+})
+Mock.mock('/sys/menu/update', 'post', (config) => {
+  //菜单页修改列信息
+  result.data = []
+  return result
+})
+Mock.mock('/sys/role/update', 'post', (config) => {
+  //菜单页修改列信息
+  result.data = []
+  return result
+})
+Mock.mock('/sys/menu/save', 'post', (config) => {
+  //菜单页添加列
+  result.data = []
+  return result
+})
+Mock.mock('/sys/role/save', 'post', (config) => {
+  //菜单页添加列
+  result.data = []
+  return result
+})
+Mock.mock(RegExp('/sys/menu/info/*'), 'get', () => {
+  result.data = {
+    id: 3,
+    statu: 1,
+    parentId: 1,
+    name: '角色管理',
+    path: '/sys/roles',
+    perms: 'sys:role:list',
+    component: 'sys/Role',
+    type: 1,
+    icon: 'el-icon-rank',
+    orderNum: 2,
+    children: [],
+  }
+
+  return result
+})
+Mock.mock(RegExp('/sys/role/info/*'), 'get', () => {
+  result.data = {
+    id: 1,
+    statu: 1,
+    code: '1',
+    name: '普通管理员',
+    remark: '///////////',
+  }
+
   return result
 })

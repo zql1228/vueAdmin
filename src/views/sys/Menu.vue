@@ -1,5 +1,5 @@
 <template>
-  <div class="div_menu">
+  <div class="div_container">
     <!--搜索框-->
     <el-form :inline="true" :model="searchForm">
       <el-form-item prop="name">
@@ -12,30 +12,48 @@
       </el-form-item>
     </el-form>
     <!--列表-->
-    <el-table :data="tableData" style="width: 100%" border row-key="id">
-      <el-table-column v-for="(item, i) of columns" :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
-        :key="item.prop" :prop="item.prop" :label="item.label" :width="item.width">
-        <template v-if="item.prop == '类型'" slot-scope="scope">
-          <el-tag v-if="scope.row.type === 0" size="small">目录</el-tag>
-          <el-tag v-else-if="scope.row.type === 1" size="small" type="success">菜单</el-tag>
-          <el-tag v-else-if="scope.row.type === 2" size="small" type="info">按钮</el-tag>
-        </template>
-        <template v-if="item.prop == '状态'" slot-scope="scope">
-          <el-tag v-if="scope.row.statu === 0" size="small" type="danger">禁用</el-tag>
-          <el-tag v-else-if="scope.row.statu === 1" size="small" type="success">正常</el-tag>
+    <el-table :data="tableData" style="width: 100%" :style="{ height: tableHeight + 'px' }" border row-key="id" :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+      <el-table-column v-for="(item, i) of columns" :key="item.prop" :prop="item.prop" :label="item.label" :width="item.width">
+        <template slot-scope="scope">
+          <template v-if="item.label == '类型'">
+            <el-tag v-show="scope.row.type == 0" size="small">目录</el-tag>
+            <el-tag v-show="scope.row.type == 1" size="small" type="success">菜单</el-tag>
+            <el-tag v-show="scope.row.type == 2" size="small" type="info">按钮</el-tag>
+          </template>
+          <template v-else-if="item.label == '状态'">
+            <el-tag v-show="scope.row.statu == 0" size="small" type="danger">禁用</el-tag>
+            <el-tag v-show="scope.row.statu == 1" size="small" type="success">正常</el-tag>
+          </template>
+          <template v-else>{{ scope.row[item.prop] }}</template>
         </template>
       </el-table-column>
       <el-table-column prop="action" label="操作" width="120">
         <template slot-scope="scope">
-          <el-button type="text">编辑</el-button>
+          <el-button type="text" @click="editHandle(scope.row.id)">编辑</el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-popconfirm title="确定要删除这条记录吗？">
+          <el-popconfirm title="确定要删除这条记录吗？" @confirm="delHandle(scope.row.id)">
             <el-button type="text" slot="reference">删除</el-button>
           </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="菜单信息" :visible.sync="dialogFormVisible" width="600px" @closed="resetForm('editForm')">
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e6e6e6',
+        padding: '14px 18px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
+      <el-pagination background layout="prev, pager, next" :total="tableData.length"> </el-pagination>
+    </div>
+
+    <el-dialog title="菜单信息" :visible.sync="dialogFormVisible" width="600px" :close-on-click-modal="false" @closed="resetForm('editForm')">
       <el-form :model="editForm" :rules="editFormRules" ref="editForm">
         <el-form-item label="上级菜单" prop="parentId" label-width="100px">
           <!--模拟树形下拉框-->
@@ -90,48 +108,11 @@
   </div>
 </template>
 <script>
+import { MenuCom } from './common/columns.js'
 export default {
   data() {
     return {
-      columns: [
-        {
-          label: '名称',
-          prop: 'name',
-          width: '180',
-        },
-        {
-          label: '权限编码',
-          prop: 'perms',
-          width: '180',
-        },
-        {
-          label: '图表',
-          prop: 'icon',
-          width: '120',
-        },
-        {
-          label: '类型',
-          prop: 'type',
-          width: '120',
-        },
-        {
-          label: '菜单URL',
-          prop: 'path',
-        },
-        {
-          label: '菜单组件',
-          prop: 'component',
-        },
-        {
-          label: '排序号',
-          prop: 'sortNum',
-        },
-        {
-          label: '状态',
-          prop: 'statu',
-          width: '120',
-        },
-      ],
+      columns: MenuCom,
       tableData: [],
       searchForm: {
         name: '',
@@ -159,32 +140,57 @@ export default {
   mounted() {
     this.getMenuTree()
   },
+  computed: {
+    tableHeight() {
+      return window.innerHeight - (41 + 55 + 61 + 15 + 62)
+    },
+  },
   methods: {
     getMenuTree() {
-      this.$axios
-        .get('/sys/menu/list', {
-          params: {
-            name: this.searchForm.name,
-          },
-        })
-        .then((res) => {
-          console.log(res)
-          this.tableData = res.data.data
-        })
+      // { params: { name: this.searchForm.name } }
+      this.$axios.get('/sys/menu/list').then((res) => {
+        // console.log(res)
+        this.tableData = res.data.data
+      })
     },
-    editHandle(id) {},
-    delHandle(id) {},
+    editHandle(id) {
+      this.$axios.get('/sys/menu/info/' + id).then((res) => {
+        this.editForm = res.data.data
+        this.dialogFormVisible = true
+      })
+    },
+    delHandle(id) {
+      this.$axios.get('/sys/menu/delete/' + id).then((res) => {
+        this.$message({ message: '删除成功', type: 'success' })
+      })
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields()
       this.editForm = {}
       this.dialogFormVisible = false
     },
-    submitEditForm(formName) {},
+    submitEditForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.$axios.post('/sys/menu/' + (this.editForm.id ? 'update' : 'save'), this.editForm).then((res) => {
+            console.log(res.data)
+            this.resetForm(formName),
+              this.$message({
+                showClose: true,
+                message: '恭喜你，操作成功',
+                type: 'success',
+                onClose: () => {
+                  this.getMenuTree()
+                },
+              })
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
   },
 }
 </script>
-<style scoped>
-div.div_menu {
-  padding: 0 24px;
-}
-</style>
+<style scoped></style>
