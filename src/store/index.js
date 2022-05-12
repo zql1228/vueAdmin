@@ -1,26 +1,27 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import menus from './modules/menus'
+import persistedState from 'vuex-persistedstate'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token:''
+    token: '',
   },
-  getters: {
-  },
+  getters: {},
   mutations: {
-    SET_TOKEN:(state,token)=>{
-      state.token=token
-      localStorage.setItem('token',token)
+    SET_TOKEN: (state, token) => {
+      state.token = token
+      localStorage.setItem('token', token)
     },
-    resetState:(state)=>{
-      state.token=""
-    }
+    resetState: (state) => {
+      state.token = ''
+    },
   },
-  actions: {
+  actions: {},
+  modules: {
+    //modules的用法
+    menus,
   },
-  modules: {//modules的用法
-    menus
-  }
+  plugins: [persistedState({ storage: window.sessionStorage })],
 })

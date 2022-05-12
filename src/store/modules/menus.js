@@ -16,9 +16,7 @@ export default {
       },
     ],
   },
-  getters: {
-    //这里面是写什么的 关于如何获取state里面的值
-  },
+  getters: {},
   mutations: {
     setMenuList(state, menus) {
       state.menuList = menus
