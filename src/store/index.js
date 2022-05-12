@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import menus from './modules/menus'
-import persistedState from 'vuex-persistedstate'
+// import persistedState from 'vuex-persistedstate'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: '',
+    token: null,
   },
   getters: {},
   mutations: {
@@ -23,5 +23,5 @@ export default new Vuex.Store({
     //modules的用法
     menus,
   },
-  plugins: [persistedState({ storage: window.sessionStorage })],
+  // plugins: [persistedState({ storage: window.sessionStorage })],
 })

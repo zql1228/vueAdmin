@@ -8,7 +8,9 @@
       <el-form-item>
         <el-button type="primary">搜索</el-button>
         <el-button type="primary" @click="dialogFormVisible = true">新增</el-button>
-        <el-button type="danger">批量删除</el-button>
+        <el-popconfirm title="这是确定批量删除吗？" @confirm="delHandle(null)">
+          <el-button style="margin: 0 10px" type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
+        </el-popconfirm>
       </el-form-item>
     </el-form>
     <el-table border row-key="id" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
@@ -24,7 +26,8 @@
       </el-table-column>
       <el-table-column prop="action" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button type="text">分配权限</el-button>
+          <el-button type="text" @click="permHandle(scope.row.id)">分配权限</el-button>
+          <el-divider direction="vertical"></el-divider>
           <el-button type="text" @click="editHandle(scope.row.id)">编辑</el-button>
           <el-divider direction="vertical"></el-divider>
           <el-popconfirm title="确定要删除这条记录吗？" @confirm="delHandle(scope.row.id)">
@@ -33,6 +36,8 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" :page-sizes="[10, 20, 50, 100]" :current-page="current" :page-size="size" :total="total"> </el-pagination>
+
     <el-dialog title="角色信息" :visible.sync="dialogFormVisible" width="600px" :close-on-click-modal="false" @closed="resetForm('editForm')">
       <el-form :model="editForm" :rules="editFormRules" ref="editForm">
         <el-form-item label="角色名称" prop="name" label-width="100px">
@@ -56,6 +61,15 @@
         <el-button type="primary" @click="submitEditForm('editForm')">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="分配权限" :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" @closed="resetForm('permForm')">
+      <el-form :model="permForm">
+        <el-tree :data="permTreeData" show-checkbox ref="permTree" :default-expand-all="true" node-key="id" :check-strictly="true" :props="defaultProps"> </el-tree>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="permDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitPermFormHandle('permForm')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -70,24 +84,127 @@ export default {
       tableData: [],
       multipleSelection: [],
       dialogFormVisible: false,
+      dialogVisible: false,
+      delBtlStatu: true,
       editForm: {},
+      permForm: {},
       editFormRules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
         code: [{ required: true, message: '请输入唯一编码', trigger: 'blur' }],
         statu: [{ required: true, message: '请选择状态', trigger: 'blur' }],
       },
+      total: 2,
+      current: 1,
+      size: 10,
+      permTreeData: [
+        {
+          id: 1,
+          label: '一级 1',
+          children: [
+            {
+              id: 4,
+              label: '二级 1-1',
+              children: [
+                {
+                  id: 9,
+                  label: '三级 1-1-1',
+                },
+                {
+                  id: 10,
+                  label: '三级 1-1-2',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          label: '一级 2',
+          children: [
+            {
+              id: 5,
+              label: '二级 2-1',
+            },
+            {
+              id: 6,
+              label: '二级 2-2',
+            },
+          ],
+        },
+        {
+          id: 3,
+          label: '一级 3',
+          children: [
+            {
+              id: 7,
+              label: '二级 3-1',
+            },
+            {
+              id: 8,
+              label: '二级 3-2',
+            },
+          ],
+        },
+      ],
+      defaultProps: {
+        children: 'children',
+        label: 'label',
+      },
     }
   },
   mounted() {
-    this.getMenuTree()
+    this.getRoleList()
   },
   methods: {
-    getMenuTree() {
+    getRoleList() {
       // { params: { name: this.searchForm.name } }
       this.$axios.get('/sys/role/list').then((res) => {
         // console.log(res)
         this.tableData = res.data.data.records
       })
+    },
+    permHandle(id) {
+      this.dialogVisible = true
+      this.$axios.get('/sys/role/info/' + id).then((res) => {
+        this.$refs.permTree.setCheckedKeys(res.data.data.menuIds)
+        this.getRoleList()
+      })
+    },
+    submitPermFormHandle(formName) {
+      var menuIds = this.$refs.permTree.getCheckedKeys()
+
+      console.log(menuIds)
+
+      this.$axios.post('/sys/role/perm/' + this.permForm.id, menuIds).then((res) => {
+        this.$message({
+          showClose: true,
+          message: '恭喜你，操作成功',
+          type: 'success',
+          onClose: () => {
+            this.getRoleList()
+          },
+        })
+        this.permDialogVisible = false
+        this.resetForm(formName)
+      })
+    },
+    handleSelectionChange(val) {
+      console.log('勾选')
+      console.log(val)
+      this.multipleSelection = val
+
+      this.delBtlStatu = val.length > 0 ? false : true
+    },
+
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+      this.size = val
+      this.getRoleList()
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+      this.current = val
+      this.getRoleList()
     },
     editHandle(id) {
       //编辑
@@ -102,9 +219,11 @@ export default {
       })
     },
     resetForm(formName) {
-      this.$refs[formName].resetFields()
       this.editForm = {}
+      this.permForm = {}
       this.dialogFormVisible = false
+      this.dialogVisible = false
+      this.$refs[formName].resetFields()
     },
     submitEditForm(formName) {
       this.$refs[formName].validate((valid) => {
@@ -142,4 +261,9 @@ export default {
   },
 }
 </script>
-<style scoped></style>
+<style scoped>
+.el-pagination {
+  float: right;
+  margin-top: 20px;
+}
+</style>

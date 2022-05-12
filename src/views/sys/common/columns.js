@@ -215,3 +215,41 @@ export const RoleCom = [
     width: '120',
   },
 ]
+export const UserCom = [
+  {
+    label: '头像',
+    prop: 'avatar',
+    width: '120',
+  },
+  {
+    label: '用户名',
+    prop: 'username',
+    width: '120',
+  },
+  {
+    label: '角色名称',
+    prop: 'code',
+    width: '120',
+  },
+  {
+    label: '邮箱',
+    prop: 'email',
+    width: '180',
+  },
+  {
+    label: '手机号',
+    prop: 'phone',
+    width: '180',
+  },
+
+  {
+    label: '状态',
+    prop: 'statu',
+    width: '120',
+  },
+  {
+    label: '创建时间',
+    prop: 'created',
+    minWidth: '180',
+  },
+]
