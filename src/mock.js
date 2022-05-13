@@ -101,7 +101,7 @@ Mock.mock('/sys/user/updataPass', 'post', (config) => {
 })
 Mock.mock('/sys/menu/nav', 'get', (config) => {
   //获取路由
-  let authoritys = []
+  let authoritys = ['sys:user:list', 'sys:user:save', 'sys:user:delete']
   result.data = {
     nav,
     authoritys: authoritys,

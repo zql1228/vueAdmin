@@ -7,9 +7,9 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary">搜索</el-button>
-        <el-button type="primary" @click="dialogFormVisible = true">新增</el-button>
+        <el-button type="primary" @click="dialogFormVisible = true" v-if="hasAuth('sys:user:save')">新增</el-button>
         <el-popconfirm title="这是确定批量删除吗？" @confirm="delHandle(null)">
-          <el-button style="margin: 0 10px" type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
+          <el-button style="margin: 0 10px" type="danger" slot="reference" v-if="hasAuth('sys:user:del')" :disabled="delBtlStatu">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
     </el-form>

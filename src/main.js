@@ -5,6 +5,7 @@ import store from './store'
 import Element from 'element-ui'
 // import axios from "./axios";
 import request from './axios'
+import global from './assets/js/globalFun'
 Vue.prototype.$axios = request
 import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/main.css'

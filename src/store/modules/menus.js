@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default {
   state: {
-    hsRoute: false,
+    hasRoute: false,
     menuList: [],
     permList: [],
     editableTabsValue: 'Index',
